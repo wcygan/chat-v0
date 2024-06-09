@@ -1,0 +1,13 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/wcygan/chat-v0
+plugins:
+  - plugin: buf.build/grpc/go:v1.3.0
+    out: generated/go
+    opt:
+      - paths=source_relative
+  - plugin: buf.build/protocolbuffers/go
+    out: generated/go
+    opt: paths=source_relative
