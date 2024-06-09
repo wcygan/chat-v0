@@ -5,22 +5,32 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"sync"
 )
 
 type server struct {
 	pb.UnimplementedChatServiceServer
+	activeStreams []pb.ChatService_ChatServer
+	mu            sync.Mutex
 }
 
 func (s *server) Chat(stream pb.ChatService_ChatServer) error {
+	s.mu.Lock()
+	s.activeStreams = append(s.activeStreams, stream)
+	s.mu.Unlock()
+
 	for {
 		msg, err := stream.Recv()
 		if err != nil {
-			return err
+			return err  // Handle disconnection or stream errors
 		}
-		log.Printf("Received message from %s: %s", msg.User, msg.Message)
-		if err := stream.Send(msg); err != nil {
-			return err
+		s.mu.Lock()
+		for _, clientStream := range s.activeStreams {
+			if err := clientStream.Send(msg); err != nil {
+				// Handle failed send, possibly removing the clientStream from activeStreams
+			}
 		}
+		s.mu.Unlock()
 	}
 }
 
