@@ -1,3 +1,7 @@
+# Chat V0
+
+The most basic chat application that simply keeps track of everyone who is connected and sends every messages to everyone
+
 # Quickstart
 
 Generate proto files
